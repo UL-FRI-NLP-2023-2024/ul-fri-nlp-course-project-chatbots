@@ -17,3 +17,98 @@
     volume = {12},
     doi = {10.1371/journal.pone.0168876}
 }
+
+@inproceedings{houlsby2019parameter,
+  title={Parameter-efficient transfer learning for NLP},
+  author={Houlsby, Neil and Giurgiu, Andrei and Jastrzebski, Stanislaw and Morrone, Bruna and De Laroussilhe, Quentin and Gesmundo, Andrea and Attariyan, Mona and Gelly, Sylvain},
+  booktitle={International conference on machine learning},
+  pages={2790--2799},
+  year={2019},
+  organization={PMLR}
+}
+
+@article{he2021towards,
+  title={Towards a unified view of parameter-efficient transfer learning},
+  author={He, Junxian and Zhou, Chunting and Ma, Xuezhe and Berg-Kirkpatrick, Taylor and Neubig, Graham},
+  journal={arXiv preprint arXiv:2110.04366},
+  year={2021}
+}
+
+@article{ruckle2020adapterdrop,
+  title={Adapterdrop: On the efficiency of adapters in transformers},
+  author={R{\"u}ckl{\'e}, Andreas and Geigle, Gregor and Glockner, Max and Beck, Tilman and Pfeiffer, Jonas and Reimers, Nils and Gurevych, Iryna},
+  journal={arXiv preprint arXiv:2010.11918},
+  year={2020}
+}
+
+@article{li2021prefix,
+  title={Prefix-tuning: Optimizing continuous prompts for generation},
+  author={Li, Xiang Lisa and Liang, Percy},
+  journal={arXiv preprint arXiv:2101.00190},
+  year={2021}
+}
+
+
+@misc{dinh_lift_2022,
+	title = {{LIFT}: {Language}-{Interfaced} {Fine}-{Tuning} for {Non}-{Language} {Machine} {Learning} {Tasks}},
+	shorttitle = {{LIFT}},
+	url = {http://arxiv.org/abs/2206.06565},
+	abstract = {Fine-tuning pretrained language models (LMs) without making any architectural changes has become a norm for learning various language downstream tasks. However, for non-language downstream tasks, a common practice is to employ task-speciﬁc designs for input, output layers, and loss functions. For instance, it is possible to ﬁne-tune an LM into an MNIST classiﬁer by replacing the word embedding layer with an image patch embedding layer, the word token output layer with a 10-way output layer, and the word prediction loss with a 10-way classiﬁcation loss, respectively. A natural question arises: Can LM ﬁne-tuning solve non-language downstream tasks without changing the model architecture or loss function? To answer this, we propose Language-Interfaced Fine-Tuning (LIFT) and study its efﬁcacy and limitations by conducting an extensive empirical study on a suite of non-language classiﬁcation and regression tasks. LIFT does not make any changes to the model architecture or loss function, and it solely relies on the natural language interface, enabling “no-code machine learning with LMs.” We ﬁnd that LIFT performs comparably well across a wide range of low-dimensional classiﬁcation and regression tasks, matching the performances of the best baselines in many cases, especially for the classiﬁcation tasks. We also report experimental results on the fundamental properties of LIFT, including inductive bias, robustness, and sample complexity. We also analyze the effect of pretraining on LIFT and a few properties/techniques speciﬁc to LIFT, e.g., context-aware learning via appropriate prompting, calibrated predictions, data generation, and two-stage ﬁnetuning. Our code is available at https://github.com/UW-Madison-Lee-Lab/ LanguageInterfacedFineTuning.},
+	language = {en},
+	urldate = {2024-03-22},
+	publisher = {arXiv},
+	author = {Dinh, Tuan and Zeng, Yuchen and Zhang, Ruisu and Lin, Ziqian and Gira, Michael and Rajput, Shashank and Sohn, Jy-yong and Papailiopoulos, Dimitris and Lee, Kangwook},
+	month = oct,
+	year = {2022},
+	note = {arXiv:2206.06565 [cs]},
+	keywords = {Computer Science - Computation and Language, Computer Science - Machine Learning},
+	annote = {Comment: Accepted at NeurIPS 2022},
+	file = {Dinh et al. - 2022 - LIFT Language-Interfaced Fine-Tuning for Non-Lang.pdf:/Users/lenatrnovec/Zotero/storage/HWAQWLKQ/Dinh et al. - 2022 - LIFT Language-Interfaced Fine-Tuning for Non-Lang.pdf:application/pdf},
+}
+
+@misc{zeng_expressive_2024,
+	title = {The {Expressive} {Power} of {Low}-{Rank} {Adaptation}},
+	url = {http://arxiv.org/abs/2310.17513},
+	abstract = {Low-Rank Adaptation (LoRA), a parameter-efficient fine-tuning method that leverages low-rank adaptation of weight matrices, has emerged as a prevalent technique for fine-tuning pre-trained models such as large language models and diffusion models. Despite its huge success in practice, the theoretical underpinnings of LoRA have largely remained unexplored. This paper takes the first step to bridge this gap by theoretically analyzing the expressive power of LoRA. We prove that, for fully connected neural networks, LoRA can adapt any model \$f\$ to accurately represent any smaller target model \${\textbackslash}overline\{f\}\$ if LoRA-rank \${\textbackslash}geq({\textbackslash}text\{width of \}f) {\textbackslash}times {\textbackslash}frac\{{\textbackslash}text\{depth of \}{\textbackslash}overline\{f\}\}\{{\textbackslash}text\{depth of \}f\}\$. We also quantify the approximation error when LoRA-rank is lower than the threshold. For Transformer networks, we show any model can be adapted to a target model of the same size with rank-\$({\textbackslash}frac\{{\textbackslash}text\{embedding size\}\}\{2\})\$ LoRA adapters.},
+	language = {en},
+	urldate = {2024-03-22},
+	publisher = {arXiv},
+	author = {Zeng, Yuchen and Lee, Kangwook},
+	month = mar,
+	year = {2024},
+	note = {arXiv:2310.17513 [cs, stat]},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computation and Language, Computer Science - Machine Learning, Statistics - Machine Learning},
+	annote = {Comment: 40 pages, 5 figures},
+	file = {Zeng and Lee - 2024 - The Expressive Power of Low-Rank Adaptation.pdf:/Users/lenatrnovec/Zotero/storage/TH6KA677/Zeng and Lee - 2024 - The Expressive Power of Low-Rank Adaptation.pdf:application/pdf},
+}
+
+@misc{hu_lora_2021,
+	title = {{LoRA}: {Low}-{Rank} {Adaptation} of {Large} {Language} {Models}},
+	shorttitle = {{LoRA}},
+	url = {http://arxiv.org/abs/2106.09685},
+	abstract = {An important paradigm of natural language processing consists of large-scale pretraining on general domain data and adaptation to particular tasks or domains. As we pre-train larger models, full ﬁne-tuning, which retrains all model parameters, becomes less feasible. Using GPT-3 175B as an example – deploying independent instances of ﬁne-tuned models, each with 175B parameters, is prohibitively expensive. We propose Low-Rank Adaptation, or LoRA, which freezes the pretrained model weights and injects trainable rank decomposition matrices into each layer of the Transformer architecture, greatly reducing the number of trainable parameters for downstream tasks. Compared to GPT-3 175B ﬁne-tuned with Adam, LoRA can reduce the number of trainable parameters by 10,000 times and the GPU memory requirement by 3 times. LoRA performs on-par or better than ﬁnetuning in model quality on RoBERTa, DeBERTa, GPT-2, and GPT-3, despite having fewer trainable parameters, a higher training throughput, and, unlike adapters, no additional inference latency. We also provide an empirical investigation into rank-deﬁciency in language model adaptation, which sheds light on the efﬁcacy of LoRA. We release a package that facilitates the integration of LoRA with PyTorch models and provide our implementations and model checkpoints for RoBERTa, DeBERTa, and GPT-2 at https://github.com/microsoft/LoRA.},
+	language = {en},
+	urldate = {2024-03-22},
+	publisher = {arXiv},
+	author = {Hu, Edward J. and Shen, Yelong and Wallis, Phillip and Allen-Zhu, Zeyuan and Li, Yuanzhi and Wang, Shean and Wang, Lu and Chen, Weizhu},
+	month = oct,
+	year = {2021},
+	note = {arXiv:2106.09685 [cs]},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computation and Language, Computer Science - Machine Learning},
+	annote = {Comment: Draft V2 includes better baselines, experiments on GLUE, and more on adapter latency},
+	file = {Hu et al. - 2021 - LoRA Low-Rank Adaptation of Large Language Models.pdf:/Users/lenatrnovec/Zotero/storage/M3723JE3/Hu et al. - 2021 - LoRA Low-Rank Adaptation of Large Language Models.pdf:application/pdf},
+}
+
+@article{mao2021unipelt,
+  title={Unipelt: A unified framework for parameter-efficient language model tuning},
+  author={Mao, Yuning and Mathias, Lambert and Hou, Rui and Almahairi, Amjad and Ma, Hao and Han, Jiawei and Yih, Wen-tau and Khabsa, Madian},
+  journal={arXiv preprint arXiv:2110.07577},
+  year={2021}
+}
+
+@article{zhou2023autopeft,
+  title={Autopeft: Automatic configuration search for parameter-efficient fine-tuning},
+  author={Zhou, Han and Wan, Xingchen and Vuli{\'c}, Ivan and Korhonen, Anna},
+  journal={arXiv preprint arXiv:2301.12132},
+  year={2023}
+}
