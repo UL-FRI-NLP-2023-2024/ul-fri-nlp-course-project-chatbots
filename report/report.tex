@@ -20,6 +20,8 @@
 %----------------------------------------------------------------------------------------
 \documentclass[fleqn,moreauthors,10pt]{ds_report}
 \usepackage[english]{babel}
+\usepackage{float}
+\usepackage{array}
 
 \graphicspath{{fig/}}
 
@@ -94,41 +96,58 @@ In one of the previous articles \cite{mao2021unipelt} authors proposed a method 
 %------------------------------------------------
 
 \section*{Methods}
-\begin{itemize}
-    \item Which pretrained language model to use?
+% \begin{itemize}
+    % \item Which pretrained language model to use?
+    % \begin{itemize}
+    %     \item \textbf{BERT} (Bidirectional Encoder Representations from Transformers) - highly successful across a wide range of NLP tasks, well-suited for understanding tasks but can be adapted for generation tasks as well.
+    %     \item \textbf{GPT} (Generative Pre-trained Transformer) - excels in generation tasks and can perform admirably in understanding tasks when fine-tuned or used with prompting techniques.
+    %     \item \textbf{T5} (Text-to-Text Transfer Transformer) - versatile for both understanding and generation tasks.
+    % \end{itemize} 
+    
+    % (T5 seems like the best choice, TBD...). First testing on smaller models then onto larger ones (colab or SLING).
+    Pretrained models we will be using:
     \begin{itemize}
-        \item \textbf{BERT} (Bidirectional Encoder Representations from Transformers) - highly successful across a wide range of NLP tasks, well-suited for understanding tasks but can be adapted for generation tasks as well.
-        \item \textbf{GPT} (Generative Pre-trained Transformer) - excels in generation tasks and can perform admirably in understanding tasks when fine-tuned or used with prompting techniques.
-        \item \textbf{T5} (Text-to-Text Transfer Transformer) - versatile for both understanding and generation tasks.
-    \end{itemize} 
-    
-    (T5 seems like the best choice, TBD...). First testing on smaller models then onto larger ones (colab or SLING).
-    
-    \item Methods: 
-    \begin{itemize}
-        \item \textbf{Prompt-Tuning:} Fine-tunes a small set of task-specific tokens appended to the input without altering the original model parameters.
-        \item \textbf{Prefix-Tuning:} Attaches trainable vectors (prefixes) to the input sequence to guide the model's attention mechanism for specific tasks.
-        \item \textbf{Adapter:} Inserts small, trainable neural network layers between the pre-existing layers of the model to adapt to new tasks.
-        \item \textbf{LoRA:} Modifies the weight matrices of a model by applying low-rank updates, preserving the original parameters while adapting to new tasks.
-        \item \textbf{P-tuning} - adds trainable prompt embeddings to the input that is optimized by a prompt encoder to find a better prompt, eliminating the need to manually design prompts. The prompt tokens can be added anywhere in the input sequence, and p-tuning also introduces anchor tokens for improving performance.
-        \item \textbf{Hybrid approaches} - combine various PEFT approaches and usually achieve better performance compared to the individual PEFT methods.
-     \end{itemize}
-    
-    \item Datasets
-    
-    At least 5 different datasets that cover various natural language understanding skills (commonsense reasoning, coreference resolution, text summarization, etc.) and supervised learning settings (classification \& generation).
-    
-    From SloBENCH?
-    \begin{itemize}
-        \item https://slobench.cjvt.si/leaderboard/view/9 (sequence classification) (Given a premise and a hypothesis, the task is to detect whether the hypothesis entails, contradicts, or is neutral in relation to the premise.)
-        \item https://slobench.cjvt.si/leaderboard/view/12 (token classification) (Given tokenized text, the task is to annotate each token with an appropriate label.)
-        \item https://slobench.cjvt.si/leaderboard/view/7 (conditional generation, slo-eng translation)
-        \item https://slobench.cjvt.si/leaderboard/view/8 (conditional generation, slo-eng translation)
+        \item \textbf{google-bert/bert-base-uncased:} Pretrained mo\-del on English language using a masked language modeling (MLM) objective. This model is uncased, which means that it does not make a difference between english and English. It's good model for our starting implementations, because it's a bit smaller.
+        \item \textbf{EMBEDDIA/crosloengual-bert:} A trilingual mo\-del, using bert-base architecture, trained on Croatian, Slovenian, and English corpora. We opted for this model due to its potential for good performance, since it is already trained on Slovenian corpora.
     \end{itemize}
     
-    \item Which metrics to observe? (accuracy, F1...)
+    PEFT approaches used: 
+    \begin{itemize}
+        \item \textbf{Prompt-Tuning:} Fine-tunes a small set of task-specific tokens appended to the input without altering the original model parameters.
+        \item \textbf{LoRA:} Modifies the weight matrices of a model by applying low-rank updates, preserving the original parameters while adapting to new tasks.
+        \item \textbf{LoHa:} Is similar to LoRA except it approximates the large weight matrix with more low-rank matrices and combines them with the Hadamard product. The method is supposed to be even more parameter-efficient than LoRA, yet it achieves performance levels comparable to it.
+     \end{itemize}
     
-\end{itemize}
+    We decided to use \textbf{Slovene SuperGLUE} dataset, from Slobench, because it provides multiple different tasks, which are as follows:
+    \begin{itemize}
+        \item \textbf{BoolQ:} determine whether a given passage contains the answer to a yes/no question.
+        \item \textbf{CB:} determine the commitment of a statement to a specific target.
+        \item \textbf{COPA:} presents a premise and requires choosing the correct alternative explanation or cause.
+        \item \textbf{MultiRC:} answering multiple-choice questions based on a given passage, with each question having multiple correct answers.
+        \item \textbf{ReCoRD:} fill in the blank in a sentence with the correct entity mentioned in the passage.
+        \item \textbf{RTE:} determine whether one text implies another, often categorized as entailment, contradiction, or neutral.
+        \item \textbf{WSC:} test machines' understanding of pronouns and their antecedents in a sentence.
+     \end{itemize}
+    
+    % At least 5 different datasets that cover various natural language understanding skills (commonsense reasoning, coreference resolution, text summarization, etc.) and supervised learning settings (classification \& generation).
+    
+    % From SloBENCH?
+    % \begin{itemize}
+    %     \item https://slobench.cjvt.si/leaderboard/view/9 (sequence classification) (Given a premise and a hypothesis, the task is to detect whether the hypothesis entails, contradicts, or is neutral in relation to the premise.)
+    %     \item https://slobench.cjvt.si/leaderboard/view/12 (token classification) (Given tokenized text, the task is to annotate each token with an appropriate label.)
+    %     \item https://slobench.cjvt.si/leaderboard/view/7 (conditional generation, slo-eng translation)
+    %     \item https://slobench.cjvt.si/leaderboard/view/8 (conditional generation, slo-eng translation)
+    % \end{itemize}
+    
+    Metrics: 
+    \begin{itemize}
+        \item \textbf{accuracy}
+        \item \textbf{F1 score}
+     \end{itemize}
+
+    Previously described methods are not necessarily final. We may change some of them, in order to achieve a manageable set of testing combinations.
+    
+% \end{itemize}
 
 % \subsection*{Equations}
 
@@ -241,17 +260,64 @@ In one of the previous articles \cite{mao2021unipelt} authors proposed a method 
 % ------------------------------------------------
 
 \section*{Results}
-TODO
+
+Up to this point, we tried to fine tune some models on different tasks from the dataset. The results are shown in tables \ref{table:boolq_performance}, \ref{table:cb_performance} and \ref{table:copa_performance}. During the process of training and fine tuning, we ran into some problems, as the models achieved very bad performance in some cases. Despite thorough debugging and testing of our implementations, we are still not sure if there is a bug in our code or if the models really just struggle with these tasks.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|*{1}{>{\centering\arraybackslash}m{1.7 cm}}|*{1}{>{\centering\arraybackslash}m{2.2 cm}}|*{1}{>{\centering\arraybackslash}m{1.3cm}}|*{1}{>{\centering\arraybackslash}m{1.2cm}}|}
+\hline
+\textbf{Method} & \textbf{Model} & \textbf{Accuracy} & \textbf{f1} \\
+
+\hline
+ prompt tuning & bert-base-uncased & 0.83 &   0.79\\
+\hline
+LoHa & bert-base-uncased & 0.78 & 0.6806\\
+\hline
+
+\end{tabular}
+\end{center}
+\caption{BoolQ task results on evaluation split of the dataset.}
+\label{table:boolq_performance}
+\end{table}
+
+
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|*{1}{>{\centering\arraybackslash}m{1.7 cm}}|*{1}{>{\centering\arraybackslash}m{2.2 cm}}|*{1}{>{\centering\arraybackslash}m{1.3cm}}|*{1}{>{\centering\arraybackslash}m{1.2cm}}|}
+\hline
+\textbf{Method} & \textbf{Model} & \textbf{Accuracy} & \textbf{f1} \\
+
+\hline
+ prompt tuning & bert-base-uncased & 0.31 &  0.15\\
+\hline
+
+\end{tabular}
+\end{center}
+\caption{CB task results on evaluation split of the dataset.}
+\label{table:cb_performance}
+\end{table}
+
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|*{1}{>{\centering\arraybackslash}m{1.7 cm}}|*{1}{>{\centering\arraybackslash}m{2.2 cm}}|*{1}{>{\centering\arraybackslash}m{1.3cm}}|*{1}{>{\centering\arraybackslash}m{1.2cm}}|}
+\hline
+\textbf{Method} & \textbf{Model} & \textbf{Accuracy} & \textbf{f1} \\
+
+\hline
+LoHa & bert-base-uncased & 0.52 & 0.52\\
+\hline
+
+\end{tabular}
+\end{center}
+\caption{COPA task results on evaluation split of the dataset.}
+\label{table:copa_performance}
+\end{table}
 
 % Use the results section to present the final results of your work. Present the results in a objective and scientific fashion. Use visualisations to convey your results in a clear and efficient manner. When comparing results between various techniques use appropriate statistical methodology.
 
-% \subsection*{More random text}
-
-% This text is inserted only to make this template look more like a proper report. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam blandit dictum facilisis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Interdum et malesuada fames ac ante ipsum primis in faucibus. Etiam convallis tellus velit, quis ornare ipsum aliquam id. Maecenas tempus mauris sit amet libero elementum eleifend. Nulla nunc orci, consectetur non consequat ac, consequat non nisl. Aenean vitae dui nec ex fringilla malesuada. Proin elit libero, faucibus eget neque quis, condimentum laoreet urna. Etiam at nunc quis felis pulvinar dignissim. Phasellus turpis turpis, vestibulum eget imperdiet in, molestie eget neque. Curabitur quis ante sed nunc varius dictum non quis nisl. Donec nec lobortis velit. Ut cursus, libero efficitur dictum imperdiet, odio mi fermentum dui, id vulputate metus velit sit amet risus. Nulla vel volutpat elit. Mauris ex erat, pulvinar ac accumsan sit amet, ultrices sit amet turpis.
-
-% Phasellus in ligula nunc. Vivamus sem lorem, malesuada sed pretium quis, varius convallis lectus. Quisque in risus nec lectus lobortis gravida non a sem. Quisque et vestibulum sem, vel mollis dolor. Nullam ante ex, scelerisque ac efficitur vel, rhoncus quis lectus. Pellentesque scelerisque efficitur purus in faucibus. Maecenas vestibulum vulputate nisl sed vestibulum. Nullam varius turpis in hendrerit posuere.
-
-% Nulla rhoncus tortor eget ipsum commodo lacinia sit amet eu urna. Cras maximus leo mauris, ac congue eros sollicitudin ac. Integer vel erat varius, scelerisque orci eu, tristique purus. Proin id leo quis ante pharetra suscipit et non magna. Morbi in volutpat erat. Vivamus sit amet libero eu lacus pulvinar pharetra sed at felis. Vivamus non nibh a orci viverra rhoncus sit amet ullamcorper sem. Ut nec tempor dui. Aliquam convallis vitae nisi ac volutpat. Nam accumsan, erat eget faucibus commodo, ligula dui cursus nisi, at laoreet odio augue id eros. Curabitur quis tellus eget nunc ornare auctor.
 
 
 %------------------------------------------------
