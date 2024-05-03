@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+report/code/slovene_superglue/BoolQ/models
+report/code/slovene_superglue/CB/models
+report/code/slovene_superglue/COPA/models
