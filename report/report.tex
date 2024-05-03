@@ -124,7 +124,6 @@ In one of the previous articles \cite{mao2021unipelt} authors proposed a method 
         \item \textbf{CB:} determine the commitment of a statement to a specific target.
         \item \textbf{COPA:} presents a premise and requires choosing the correct alternative explanation or cause.
         \item \textbf{MultiRC:} answering multiple-choice questions based on a given passage, with each question having multiple correct answers.
-        \item \textbf{ReCoRD:} fill in the blank in a sentence with the correct entity mentioned in the passage.
         \item \textbf{RTE:} determine whether one text implies another, often categorized as entailment, contradiction, or neutral.
         \item \textbf{WSC:} test machines' understanding of pronouns and their antecedents in a sentence.
      \end{itemize}
@@ -270,9 +269,22 @@ Up to this point, we tried to fine tune some models on different tasks from the 
 \textbf{Method} & \textbf{Model} & \textbf{Accuracy} & \textbf{f1} \\
 
 \hline
+ fine tuning only & bert-base-uncased & 0.72 &   0.73\\
+\hline
  prompt tuning & bert-base-uncased & 0.83 &   0.79\\
 \hline
-LoHa & bert-base-uncased & 0.78 & 0.6806\\
+LoHa & bert-base-uncased & 0.78 & 0.68\\
+\hline
+LoRa & bert-base-uncased & 0.78 & 0.68\\
+\hline
+\hline
+ fine tuning only & crosloengual-bert & 0.83 &   0.82\\
+\hline
+ prompt tuning & crosloengual-bert & 0.78 &   0.68\\
+\hline
+LoHa & crosloengual-bert & 0.83 & 0.82\\
+\hline
+LoRa & crosloengual-bert & 0.78 & 0.68\\
 \hline
 
 \end{tabular}
@@ -290,7 +302,22 @@ LoHa & bert-base-uncased & 0.78 & 0.6806\\
 \textbf{Method} & \textbf{Model} & \textbf{Accuracy} & \textbf{f1} \\
 
 \hline
- prompt tuning & bert-base-uncased & 0.31 &  0.15\\
+ fine tuning only & bert-base-uncased & 0.36 &  0.24\\
+\hline
+ prompt tuning & bert-base-uncased & 0.32 &  0.15\\
+\hline
+LoHa & bert-base-uncased & 0.32 &  0.15\\
+\hline
+LoRa & bert-base-uncased & 0.32 &  0.15\\
+\hline
+\hline
+ fine tuning only & crosloengual-bert & 0.68 &  0.64\\
+\hline
+ prompt tuning & crosloengual-bert & 0.32 &  0.15\\
+\hline
+LoHa & crosloengual-bert & 0.32 &  0.15\\
+\hline
+LoRa & crosloengual-bert & 0.32 &  0.15\\
 \hline
 
 \end{tabular}
@@ -307,8 +334,20 @@ LoHa & bert-base-uncased & 0.78 & 0.6806\\
 \textbf{Method} & \textbf{Model} & \textbf{Accuracy} & \textbf{f1} \\
 
 \hline
+ fine tuning only & bert-base-uncased & 0.55 & 0.39\\
+\hline
 LoHa & bert-base-uncased & 0.52 & 0.52\\
 \hline
+LoRa & bert-base-uncased & 0.50 & 0.49\\
+\hline
+\hline
+ fine tuning only & crosloengual-bert & 0.51 & 0.49\\
+\hline
+LoHa & crosloengual-bert & 0.58 & 0.58\\
+\hline
+LoRa & crosloengual-bert & 0.49 & 0.49\\
+\hline
+
 
 \end{tabular}
 \end{center}
