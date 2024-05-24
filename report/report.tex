@@ -24,6 +24,7 @@
 \usepackage{array}
 
 \graphicspath{{fig/}}
+\usepackage{subcaption}
 
 
 
@@ -49,7 +50,7 @@
 \affiliation{\textit{Advisors: Aleš Žagar}}
 
 % Keywords
-\Keywords{Fine-tuning ...}
+\Keywords{Fine-tuning, PEFT, NLP, LLM}
 \newcommand{\keywordname}{Keywords}
 
 
@@ -58,7 +59,8 @@
 %----------------------------------------------------------------------------------------
 
 \Abstract{
-The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here.
+In the realm of natural language processing (NLP), transformer-based pretrained language models (PLMs) have emerged as powerful tools for understanding and generating human-like text. However, fine-tuning these models for task-specific data often demands substantial computational resources. To address this challenge, various parameter-efficient fine-tuning (PEFT) techniques have been developed. In this study, we explore the performance of different PEFT methods on a range of NLP tasks, including machine translation and classification tasks. We compare the efficiency of these methods in terms of computational resources and their ability to maintain competitive performance compared to traditional fine-tuning. Our findings indicate that PEFT methods offer significant reductions in computational overhead while achieving comparable performance in many cases.
+% However, challenges arise in tasks requiring deeper understanding, where PEFT methods may struggle to capture nuanced relationships within the data. To enhance future research, integrating larger pre-trained models and expanding the scope of evaluated tasks would provide valuable insights into the effectiveness of PEFT methods across diverse linguistic challenges.
 }
 
 %----------------------------------------------------------------------------------------
@@ -79,281 +81,157 @@ The abstract goes here. The abstract goes here. The abstract goes here. The abst
 %----------------------------------------------------------------------------------------
 
 \section*{Introduction}
-Transformer-based pretrained language models (PLMs) have revolutionized natural language processing (NLP) tasks, by demonstrating remarkable success in understanding and generating human-like text. To fully harness their potential, fine-tuning is employed to adapt the models to task specific data and enhance their performance. However, traditional fine-tuning involves updating all the pretrained parameters of PLM, which requires substantial computational resources. With PLMs continuing to grow, the number of parameters increases even further and so do the computational demands, which becomes a significant challenge. In response to that, various parameter efficient fine-tunning (PEFT) techniques have emerged, as a viable solution to compensate for the tremendous computational cost, while still maintaining comparable performance to the full fine-tuning.
+Transformer-based pretrained language models (PLMs) have revolutionized natural language processing (NLP) tasks, by demonstrating remarkable success in understanding and generating human-like text. To fully harness their potential, fine-tuning is employed to adapt the models to task specific data and enhance their performance. However, traditional fine-tuning involves updating all the pretrained parameters of PLM, which requires substantial computational resources. With PLMs continuing to grow, the number of parameters increases even further and so do the computational demands, which becomes a significant challenge. In response to that, various parameter efficient fine-tuning (PEFT) techniques have emerged (Figure \ref{fig:PEFT-diagram}), as a viable solution to compensate for the tremendous computational cost, while still maintaining comparable performance to the full fine-tuning.
 
-One of the commonly used techniques is additive fine-tuning, which adds new trainable parameters to pre-trained models. It can be divided into adapter and soft prompt-based methods. Adapters insert small modules between transformer layers in the existing model structure, while soft prompts add trainable vectors to the model inputs, subtly directing the output with minimal changes. In previous research a variety of adapter methods were explored. Some of the notable ones are parallel adapter \cite{he2021towards} which integrates the network in parallel with the feed-forward layer and attention layer and AdapterDrop \cite{ruckle2020adapterdrop} which selectively removes adapters which are not important to the given task. Both methods build upon the foundational concept discussed in \cite{houlsby2019parameter} and present valuable case studies for our investigation. We will also examine prefix-tuning, a prompt-based method \cite{li2021prefix}. This approach focuses on optimizing a task-specific set of parameters, known as a \textit{prefix}. It modifies only about 0.1\% of the parameters in comparison to traditional fine-tuning. Despite this, it achieves comparable performance in datasets with full data settings, making it an interesting candidate for comparison.
+One of the commonly used techniques is \textbf{additive fine-tuning}, which adds new trainable parameters to pre-trained models. It can be divided into adapter and soft prompt-based methods. Adapters insert small modules between transformer layers in the existing model structure, while soft prompts add trainable vectors to the model inputs, subtly directing the output with minimal changes. In previous research, a variety of adapter methods were explored. Some of the notable ones are parallel adapter \cite{he2021towards} which integrates the network in parallel with the feed-forward layer and attention layer and AdapterDrop \cite{ruckle2020adapterdrop} which selectively removes adapters which are not important to the given task. Under prompt-based methods we can find \textbf{prompt tuning} and prefix-tuning \cite{li2021prefix} which focuses on optimizing a task-specific set of parameters, known as a \textit{prefix}. It modifies only about 0.1\% of the parameters in comparison to traditional fine-tuning. Despite this, it achieves comparable performance in datasets with full data settings.
 
-Another method, known as Low-Rank Adaptation (LoRA), is a reparameterized fine-tuning method that specifically targets the model's weight matrices. It introduces low-rank matrices that interact with the original weights to apply precise updates, rather than altering or adding extensive new parameters \cite{hu_lora_2021}. This strategy allows for the efficient adaptation of PLMs by modifying a relatively small subset of parameters, thereby mitigating the computational load while still achieving competitive performance \cite{zeng_expressive_2024, dinh_lift_2022}.
+Another commonly used method, known as \textbf{Low-Rank Adaptation (LoRA)}, is a re-parameterized fine-tuning method that specifically targets the model's weight matrices. It introduces low-rank matrices that interact with the original weights to apply precise updates, rather than altering or adding extensive new parameters \cite{hu_lora_2021}. This strategy allows for the efficient adaptation of PLMs by modifying a relatively small subset of parameters, thereby mitigating the computational load while still achieving competitive performance \cite{zeng_expressive_2024, dinh_lift_2022}. \textbf{Low-Rank Hadamard Product (LoHa)} operates similarly to LoRA, except it approximates the large weight matrix with more low-rank matrices and combines them with the Hadamard product. This technique is even more parameter-efficient than LoRA while maintaining comparable performance \cite{nam2021fedpara}.
 
-Another possible approach is hybrid fine-tuning, which tries to combine various PEFT approaches, such as adapter, prefix-tuning and LoRA. This way it leverages the strengths of each method and mitigates their weaknesses and consequently achieves improved overall performance compared to individual PEFT methods. The work in this area is classified into two approaches: Manual Combination and Automatic Combination. The first one involves manually combining multiple PEFT methods by sophisticated design. On the other hand Automatic Combination incorporates PEFT methods automatically via structure search and because of that it typically requires more time and cost. 
-In one of the previous articles \cite{mao2021unipelt} authors proposed a method called UniPELT which incorporates sequential adapter, prefix-tuning, and LoRA via a gating mechanism. The mechanism controls the activation of each submodule, dynamically assigning higher weights to submodules that make positive contributions to a given task. The method requires more parameters and inference time than adapter, prefix-tuning, and LoRA, but achieves better performance than those individual methods. Another article \cite{zhou2023autopeft}, presents method AutoPEFT that integrates sequential adapter, parallel adapter and prefix tuning into the transformer block. The method also uses Bayesian optimization approach to automatically search for an appropriate architecture of neural network that activates certain layers to incorporate these PEFT modules.
+\begin{figure}[ht]\centering
+	\includegraphics[width=0.9\linewidth]{results/PEFT-diagram.pdf}
+	\caption{\textbf{The recent evolutionary progression of PEFT methods}, with models on the same branch sharing common features. The vertical alignment of the models indicates the timeline of their release dates \cite{Xu2023}.}
+	\label{fig:PEFT-diagram}
+\end{figure}
 
-	% These latex files are intended to serve as a the template for the NLP course at FRI.  The template is adapted from the FRI Data Science Project Competition. template  If you find mistakes in the template or have problems using it, please consult Jure Demšar (\href{mailto:jure.demsar@fri.uni-lj.si}{jure.demsar@fri.uni-lj.si}).
-	
-	% In the Introduction section you should write about the relevance of your work (what is the purpose of the project, what will we solve) and about related work (what solutions for the problem already exist). Where appropriate, reference scientific work conducted by other researchers. For example, the work done by Demšar et al. \cite{Demsar2016BalancedMixture} is very important for our project. The abbreviation et al. is for et alia, which in latin means and others, we use this abbreviation when there are more than two authors of the work we are citing. If there are two authors (or if there is a single author) we just write down their surnames. For example, the work done by Demšar and Lebar Bajec \cite{Demsar2017LinguisticEvolution} is also important for successful completion of our project.
 
+Another option is hybrid fine-tuning which combines various PEFT methods such as adapter, prefix-tuning, and LoRA to enhance performance by leveraging their strengths and mitigating weaknesses. This approach can be classified into Manual Combination and Automatic Combination. Manual Combination involves designing the combination of methods, while Automatic Combination uses structure search to incorporate these methods, requiring more time and cost \cite{mao2021unipelt, zhou2023autopeft}.
 
-%------------------------------------------------
+In our paper, we will explore the performance of different PEFT methods on various NLP tasks, such as machine translation and classification tasks. We will compare the performance of these methods with traditional fine-tuning and evaluate their efficiency in terms of computational resources.
 
 \section*{Methods}
-% \begin{itemize}
-    % \item Which pretrained language model to use?
-    % \begin{itemize}
-    %     \item \textbf{BERT} (Bidirectional Encoder Representations from Transformers) - highly successful across a wide range of NLP tasks, well-suited for understanding tasks but can be adapted for generation tasks as well.
-    %     \item \textbf{GPT} (Generative Pre-trained Transformer) - excels in generation tasks and can perform admirably in understanding tasks when fine-tuned or used with prompting techniques.
-    %     \item \textbf{T5} (Text-to-Text Transfer Transformer) - versatile for both understanding and generation tasks.
-    % \end{itemize} 
+
+    \subsection*{Datasets and tasks}
+
+    We explored two distinct task types: \textbf{generation} and \textbf{classification}. For text generation, we selected the Machine Translation task from \textbf{Slobench}, which evaluates the effectiveness of automatically translating Slovene to English. Additionaly, we also included various tasks from the Slovene SuperGLUE benchmark (also from Slobench) which is a Slovenian adaptation of the SuperGLUE benchmark \cite{sarlin2020superglue}. The following tasks were investigated:
     
-    % (T5 seems like the best choice, TBD...). First testing on smaller models then onto larger ones (colab or SLING).
-    Pretrained models we will be using:
-    \begin{itemize}
-        \item \textbf{google-bert/bert-base-uncased:} Pretrained mo\-del on English language using a masked language modeling (MLM) objective. This model is uncased, which means that it does not make a difference between english and English. It's good model for our starting implementations, because it's a bit smaller.
-        \item \textbf{EMBEDDIA/crosloengual-bert:} A trilingual mo\-del, using bert-base architecture, trained on Croatian, Slovenian, and English corpora. We opted for this model due to its potential for good performance, since it is already trained on Slovenian corpora.
-    \end{itemize}
-    
-    PEFT approaches used: 
-    \begin{itemize}
-        \item \textbf{Prompt-Tuning:} Fine-tunes a small set of task-specific tokens appended to the input without altering the original model parameters.
-        \item \textbf{LoRA:} Modifies the weight matrices of a model by applying low-rank updates, preserving the original parameters while adapting to new tasks.
-        \item \textbf{LoHa:} Is similar to LoRA except it approximates the large weight matrix with more low-rank matrices and combines them with the Hadamard product. The method is supposed to be even more parameter-efficient than LoRA, yet it achieves performance levels comparable to it.
-     \end{itemize}
-    
-    We decided to use \textbf{Slovene SuperGLUE} dataset, from Slobench, because it provides multiple different tasks, which are as follows:
     \begin{itemize}
         \item \textbf{BoolQ:} determine whether a given passage contains the answer to a yes/no question.
         \item \textbf{CB:} determine the commitment of a statement to a specific target.
         \item \textbf{COPA:} presents a premise and requires choosing the correct alternative explanation or cause.
-        \item \textbf{MultiRC:} answering multiple-choice questions based on a given passage, with each question having multiple correct answers.
-        \item \textbf{RTE:} determine whether one text implies another, often categorized as entailment, contradiction, or neutral.
-        \item \textbf{WSC:} test machines' understanding of pronouns and their antecedents in a sentence.
+        % \item \textbf{MultiRC:} answering multiple-choice questions based on a given passage, with each question having multiple correct answers.
+        \item \textbf{RTE:} focuses on whether the hypothesis logically follows from the premise, often categorized as entailment and not\_entailment.
+        % \item \textbf{WSC:} test machines' understanding of pronouns and their antecedents in a sentence.
      \end{itemize}
+     
+    \subsection*{Pretrained models}
+    Based on the selected tasks, we were restricted to using models pre-trained on Slovenian data. For classification, the following models were chosen:
     
-    % At least 5 different datasets that cover various natural language understanding skills (commonsense reasoning, coreference resolution, text summarization, etc.) and supervised learning settings (classification \& generation).
-    
-    % From SloBENCH?
-    % \begin{itemize}
-    %     \item https://slobench.cjvt.si/leaderboard/view/9 (sequence classification) (Given a premise and a hypothesis, the task is to detect whether the hypothesis entails, contradicts, or is neutral in relation to the premise.)
-    %     \item https://slobench.cjvt.si/leaderboard/view/12 (token classification) (Given tokenized text, the task is to annotate each token with an appropriate label.)
-    %     \item https://slobench.cjvt.si/leaderboard/view/7 (conditional generation, slo-eng translation)
-    %     \item https://slobench.cjvt.si/leaderboard/view/8 (conditional generation, slo-eng translation)
-    % \end{itemize}
-    
-    Metrics: 
     \begin{itemize}
-        \item \textbf{accuracy}
-        \item \textbf{F1 score}
-     \end{itemize}
+        \item \textbf{EMBEDDIA/sloberta:} A monolingual Slovene BERT-like model.
+        \item \textbf{EMBEDDIA/crosloengual-bert:} A trilingual mo\-del, using bert-base architecture, trained on Croatian, Slovenian, and English corpora. We opted for this model due to its potential for good performance, since it is already trained on Slovenian corpora.
+        \item \textbf{FacebookAI/xlm-roberta-base:} A multilingual version of RoBERTa, pre-trained on dataset containing 100 languages, including Slovene.
+    \end{itemize}
 
-    Previously described methods are not necessarily final. We may change some of them, in order to achieve a manageable set of testing combinations.
+
+    For the generation task, we needed a model designed for translation, so we used the \textbf{OPUS-MT model} \cite{huggingfaceHelsinkiNLPopusmtslaenHugging}. This model, designed for translating Slavic languages to English, is freely available and was developed by the Language Technology Research Group at the University of Helsinki.
+
+    \subsection*{PEFT approaches}
     
-% \end{itemize}
+    We inspected several parameter-efficient fine-tuning (PEFT) approaches available through the Hugging Face library and selected three commonly used and well-researched techniques that have demonstrated strong results in previous studies.
+    
+    \begin{itemize}
+        \item \textbf{Prompt-Tuning:} Fine-tunes a small set of task-specific tokens appended to the input without altering the original model parameters.
+        \item \textbf{LoRA:} Modifies the weight matrices of a model by applying low-rank updates, preserving the original parameters while adapting to new tasks.
+        \item \textbf{LoHa:} Approximates the large weight matrix with more low-rank matrices and combines them with the Hadamard product.
+     \end{itemize}
+    
+    \subsection*{Metrics}
+    In order to evaluate the trained models, we used the metrics Accuracy, F1 score and BLEU score.
 
-% \subsection*{Equations}
+    \subsubsection*{Accuracy and F1 score}
+        
+        The classification tasks were evaluated based on accuracy and F1 score. Accuracy measures the proportion of correct predictions, while the F1 score combines precision and recall to account for both false positives and false negatives and is especially useful for imbalanced datasets.
 
-% %You can write equations inline, e.g. $\cos\pi=-1$, $E = m \cdot c^2$ and $\alpha$, or you can include them as separate objects. The Bayes’s rule is stated mathematically as:
+    \subsubsection*{BLEU score}
 
-% %\begin{equation}
-% %	P(A|B) = \frac{P(B|A)P(A)}{P(B)},
-% %	\label{eq:bayes}
-% %\end{equation}
+    For the evaluation of the generated text from the translation task, we used the BLEU (Bilingual Evaluation Understudy) score. This metric measures the accuracy of the translated text by comparing it to a reference translation. Higher BLEU scores signify closer resemblance to the ground truth, indicating higher quality in the translation.
 
-% %where $A$ and $B$ are some events. You can also reference it -- the equation \ref{eq:bayes} describes the Bayes's rule.
+    \subsubsection*{GPU RAM Usage}
 
-% %\subsection*{Lists}
-
-% %We can insert numbered and bullet lists:
-
-% % the [noitemsep] option makes the list more compact
-% %\begin{enumerate}[noitemsep] 
-% %	\item First item in the list.
-% %	\item Second item in the list.
-% %	\item Third item in the list.
-% %\end{enumerate}
-
-% %\begin{itemize}[noitemsep] 
-% %	\item First item in the list.
-% %	\item Second item in the list.
-% %	\item Third item in the list.
-% %\end{itemize}
-
-% %We can use the description environment to define or describe key terms and phrases.
-
-% %\begin{description}
-% %	\item[Word] What is a word?.
-% %	\item[Concept] What is a concept?
-% %	\item[Idea] What is an idea?
-% %\end{description}
-
-
-% %\subsection*{Random text}
-
-% %This text is inserted only to make this template look more like a proper report. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam blandit dictum facilisis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Interdum et malesuada fames ac ante ipsum primis in faucibus. Etiam convallis tellus velit, quis ornare ipsum aliquam id. Maecenas tempus mauris sit amet libero elementum eleifend. Nulla nunc orci, consectetur non consequat ac, consequat non nisl. Aenean vitae dui nec ex fringilla malesuada. Proin elit libero, faucibus eget neque quis, condimentum laoreet urna. Etiam at nunc quis felis pulvinar dignissim. Phasellus turpis turpis, vestibulum eget imperdiet in, molestie eget neque. Curabitur quis ante sed nunc varius dictum non quis nisl. Donec nec lobortis velit. Ut cursus, libero efficitur dictum imperdiet, odio mi fermentum dui, id vulputate metus velit sit amet risus. Nulla vel volutpat elit. Mauris ex erat, pulvinar ac accumsan sit amet, ultrices sit amet turpis.
-
-% %Phasellus in ligula nunc. Vivamus sem lorem, malesuada sed pretium quis, varius convallis lectus. Quisque in risus nec lectus lobortis gravida non a sem. Quisque et vestibulum sem, vel mollis dolor. Nullam ante ex, scelerisque ac efficitur vel, rhoncus quis lectus. Pellentesque scelerisque efficitur purus in faucibus. Maecenas vestibulum vulputate nisl sed vestibulum. Nullam varius turpis in hendrerit posuere.
-
-
-% %\subsection*{Figures}
-
-% %You can insert figures that span over the whole page, or over just a single column. The first one, \figurename~\ref{fig:column}, is an example of a figure that spans only across one of the two columns in the report.
-
-% %\begin{figure}[ht]\centering
-% %	\includegraphics[width=\linewidth]{single_column.pdf}
-% %	\caption{\textbf{A random visualization.} This is an example of a figure that spans only across one of the two columns.}
-% %	\label{fig:column}
-% %\end{figure}
-
-% %On the other hand, \figurename~\ref{fig:whole} is an example of a figure that spans across the whole page (across both columns) of the report.
-
-% % \begin{figure*} makes the figure take up the entire width of the page
-% %\begin{figure*}[ht]\centering 
-% %	\includegraphics[width=\linewidth]{whole_page.pdf}
-% %	\caption{\textbf{Visualization of a Bayesian hierarchical model.} This is an example of a figure that spans the whole width of the report.}
-% %	\label{fig:whole}
-% %\end{figure*}
-
-
-% \subsection*{Tables}
-
-% Use the table environment to insert tables.
-
-% \begin{table}[hbt]
-% 	\caption{Table of grades.}
-% 	\centering
-% 	\begin{tabular}{l l | r}
-% 		\toprule
-% 		\multicolumn{2}{c}{Name} \\
-% 		\cmidrule(r){1-2}
-% 		First name & Last Name & Grade \\
-% 		\midrule
-% 		John & Doe & $7.5$ \\
-% 		Jane & Doe & $10$ \\
-% 		Mike & Smith & $8$ \\
-% 		\bottomrule
-% 	\end{tabular}
-% 	\label{tab:label}
-% \end{table}
-
-
-% \subsection*{Code examples}
-
-% You can also insert short code examples. You can specify them manually, or insert a whole file with code. Please avoid inserting long code snippets, advisors will have access to your repositories and can take a look at your code there. If necessary, you can use this technique to insert code (or pseudo code) of short algorithms that are crucial for the understanding of the manuscript.
-
-% \lstset{language=Python}
-% \lstset{caption={Insert code directly from a file.}}
-% \lstset{label={lst:code_file}}
-% \lstinputlisting[language=Python]{code/example.py}
-
-% \lstset{language=R}
-% \lstset{caption={Write the code you want to insert.}}
-% \lstset{label={lst:code_direct}}
-% \begin{lstlisting}
-% import(dplyr)
-% import(ggplot)
-
-% ggplot(diamonds,
-% 	   aes(x=carat, y=price, color=cut)) +
-%   geom_point() +
-%   geom_smooth()
-% \end{lstlisting}
-
-% ------------------------------------------------
+    To evaluate the computational resources required for tuning our models, we measured the RAM usage on the L4 GPU by recording its peak during training.
 
 \section*{Results}
+Below, the results of our work will be presented, in terms of computational resources required to fine tune the models and their performance on specific tasks.
 
-Up to this point, we tried to fine tune some models on different tasks from the dataset. The results are shown in tables \ref{table:boolq_performance}, \ref{table:cb_performance} and \ref{table:copa_performance}. During the process of training and fine tuning, we ran into some problems, as the models achieved very bad performance in some cases. Despite thorough debugging and testing of our implementations, we are still not sure if there is a bug in our code or if the models really just struggle with these tasks.
+\subsection*{Generative task}
+
+\subsubsection*{Machine Translation}
+
+Our first task involved translating English to Slovene using a subset of 5000 translations from the dataset RSDO4 en-sl parallel corpus \cite{huggingfaceCjvtrsdo4_en_slDatasets}. With the given dataset, we fine-tuned the opus-mt-sla-en model. 
+
+The data presented in Figure \ref{fig:machine_translation_bleu} indicates that parameter-efficient fine-tuning techniques (LoRA, LoHA) resulted in only a slight reduction in BLEU scores compared to the fully fine-tuned model. This minor difference might be because the fully fine-tuned model can handle a diverse dataset more effectively. Parameter-efficient methods, though resource efficient, might not incorporate all necessary adjustments, especially for low resource languages, as shown in the study by Su et al. \cite{su2024unlocking}. Additionally, while both LoRa and LoHa methods had similar performance outcomes, GPU consumption was significantly higher with LoRa, suggesting that LoHa may be more advantageous when it comes to saving computer resources in this instance.
+
+The prompt-tuning method was also implemented, however it resulted in a BLEU score of 0.004, suggesting issues with the code. Therefore, we did not include it in the evaluation. We also submitted the LoRa fine-tuned model to Slobench, the results are presented in table \ref{table:slobench_results}. 
+
+\begin{figure}[ht]\centering
+	\includegraphics[width=\linewidth]{results/machine_translation/translation_metrics.pdf}
+	\caption{\textbf{BLEU score (a) and GPU memory (b) usage on machine translation task} for different parameter-efficient fine-tuning techniques.}
+	\label{fig:machine_translation_bleu}
+\end{figure}
 
 \begin{table}[H]
 \begin{center}
-\begin{tabular}{|*{1}{>{\centering\arraybackslash}m{1.7 cm}}|*{1}{>{\centering\arraybackslash}m{2.2 cm}}|*{1}{>{\centering\arraybackslash}m{1.3cm}}|*{1}{>{\centering\arraybackslash}m{1.2cm}}|}
+\begin{tabular}{|*{1}{>{\centering\arraybackslash}m{0.8cm}}|*{1}{>{\centering\arraybackslash}m{0.8cm}}|*{1}{>{\centering\arraybackslash}m{1.2cm}}|*{1}{>{\centering\arraybackslash}m{0.9cm}}|*{1}{>{\centering\arraybackslash}m{1cm}}|*{1}{>{\centering\arraybackslash}m{1cm}}|}
 \hline
-\textbf{Method} & \textbf{Model} & \textbf{Accuracy} & \textbf{f1} \\
-
+BERT score &BLEU avg &METEOR avg &CHRF avg &BLEU corpus &CHRF corpus\\
 \hline
- fine tuning only & bert-base-uncased & 0.72 &   0.73\\
-\hline
- prompt tuning & bert-base-uncased & 0.83 &   0.79\\
-\hline
-LoHa & bert-base-uncased & 0.78 & 0.68\\
-\hline
-LoRa & bert-base-uncased & 0.78 & 0.68\\
-\hline
-\hline
- fine tuning only & crosloengual-bert & 0.83 &   0.82\\
-\hline
- prompt tuning & crosloengual-bert & 0.78 &   0.68\\
-\hline
-LoHa & crosloengual-bert & 0.83 & 0.82\\
-\hline
-LoRa & crosloengual-bert & 0.78 & 0.68\\
+0.933 & 0.221 & 0.568 &  0.548 & 0.259 & 0.548\\
 \hline
 
 \end{tabular}
 \end{center}
-\caption{BoolQ task results on evaluation split of the dataset.}
-\label{table:boolq_performance}
+\caption{Slobench results on LoRa fine-tuned translation model.}
+\label{table:slobench_results}
 \end{table}
 
 
-
-\begin{table}[H]
-\begin{center}
-\begin{tabular}{|*{1}{>{\centering\arraybackslash}m{1.7 cm}}|*{1}{>{\centering\arraybackslash}m{2.2 cm}}|*{1}{>{\centering\arraybackslash}m{1.3cm}}|*{1}{>{\centering\arraybackslash}m{1.2cm}}|}
-\hline
-\textbf{Method} & \textbf{Model} & \textbf{Accuracy} & \textbf{f1} \\
-
-\hline
- fine tuning only & bert-base-uncased & 0.36 &  0.24\\
-\hline
- prompt tuning & bert-base-uncased & 0.32 &  0.15\\
-\hline
-LoHa & bert-base-uncased & 0.32 &  0.15\\
-\hline
-LoRa & bert-base-uncased & 0.32 &  0.15\\
-\hline
-\hline
- fine tuning only & crosloengual-bert & 0.68 &  0.64\\
-\hline
- prompt tuning & crosloengual-bert & 0.32 &  0.15\\
-\hline
-LoHa & crosloengual-bert & 0.32 &  0.15\\
-\hline
-LoRa & crosloengual-bert & 0.32 &  0.15\\
-\hline
-
-\end{tabular}
-\end{center}
-\caption{CB task results on evaluation split of the dataset.}
-\label{table:cb_performance}
-\end{table}
+\subsection*{Classification tasks}
+As already mentioned, we focused on 4 classification tasks from Slovene SuperGLUE dataset. We   used different PEFT approaches in order to adapt the pre-trained models (Sloberta, CroSloeEngual model, and XLM Roberta) to each specific task. Then we observed their performance on the evaluation parts of the datasets.
 
 
-\begin{table}[H]
-\begin{center}
-\begin{tabular}{|*{1}{>{\centering\arraybackslash}m{1.7 cm}}|*{1}{>{\centering\arraybackslash}m{2.2 cm}}|*{1}{>{\centering\arraybackslash}m{1.3cm}}|*{1}{>{\centering\arraybackslash}m{1.2cm}}|}
-\hline
-\textbf{Method} & \textbf{Model} & \textbf{Accuracy} & \textbf{f1} \\
+\subsubsection*{COPA}
 
-\hline
- fine tuning only & bert-base-uncased & 0.55 & 0.39\\
-\hline
-LoHa & bert-base-uncased & 0.52 & 0.52\\
-\hline
-LoRa & bert-base-uncased & 0.50 & 0.49\\
-\hline
-\hline
- fine tuning only & crosloengual-bert & 0.51 & 0.49\\
-\hline
-LoHa & crosloengual-bert & 0.58 & 0.58\\
-\hline
-LoRa & crosloengual-bert & 0.49 & 0.49\\
-\hline
+We were unable to evaluate the performance of prompt-tuning for the COPA task, as multiple-choice tasks are currently not supported by Hugging Face library (issues with differences in tensor sizes).
 
+For other methods, we evaluated the performance (F1 score) and the computational resource usage (GPU memory) of PEFT methods on our pre-trained models (Figure \ref{fig:copa_scores}). All models performed similarly on the task. For the CroSloEngual model, the LoHa and LoRa methods both outperformed simple fine-tuning, with LoHa nearly doubling the F1 score. For the Sloberta and XLM Roberta models, both PEFT methods outperformed fine-tuning, with LoRa leading in both cases. Additionally, there was a significant reduction in GPU usage, with PEFT methods requiring substantially less memory. Notably, PEFT tuning on XLM Roberta required four times less GPU memory. From this, we can conclude that PEFT methods are more efficient in terms of computational resources and can achieve similar or better performance than full fine-tuning for the COPA task. 
 
-\end{tabular}
-\end{center}
-\caption{COPA task results on evaluation split of the dataset.}
-\label{table:copa_performance}
-\end{table}
+\begin{figure}[ht]\centering
+	\includegraphics[width=\linewidth]{results/superglue/COPA.pdf}
+	\caption{\textbf{F1 score (a) and GPU memory (b) usage on COPA task} for different parameter-efficient fine-tuning techniques.}
+	\label{fig:copa_scores}
+\end{figure}
+
+\subsubsection*{CB}
+
+For the CB task, we observed a different trend in performance (Figure \ref{fig:cb_scores}). In almost all cases, except for the LoHa method on the Sloberta model, the F1 score dropped significantly compared to regular fine-tuning. This might be due to the complexity of the task, which requires a more thorough understanding of the text, and key parameters might not have been tuned by the PEFT methods. However, GPU memory usage was significantly lower for all PEFT methods, with LoHa requiring the least memory. The superior performance of LoHa on the Sloberta model could be attributed to the specific architecture or parameter settings of the Sloberta model, which might align better with the LoHa method's optimization process. This indicates that while PEFT methods are more efficient in terms of computational resources, they might not be as effective as full fine-tuning for the CB task.
+
+\begin{figure}[ht]\centering
+	\includegraphics[width=\linewidth]{results/superglue/CB.pdf}
+	\caption{\textbf{F1 score (a) and GPU memory usage (b) on CB task} for different parameter-efficient fine-tuning techniques.}
+	\label{fig:cb_scores}
+\end{figure}
+
+\subsubsection*{BoolQ}
+
+Here, we observed a trend similar to that seen with the COPA task (Figure \ref{fig:boolq_scores}). In most cases, PEFT methods outperformed full fine-tuning, except for LoRa and prompt-tuning on the CroSloEngual model, where the result was slightly worse. GPU memory usage was significantly lower for all PEFT methods. Notably, for the Sloberta model, LoHa required four times less memory than full fine-tuning and three times less than LoRa, while achieving the highest F1 score. This indicates that PEFT methods are more efficient in terms of computational resources and can achieve similar or better performance than full fine-tuning for the BoolQ task.
+
+\begin{figure}[ht]\centering
+	\includegraphics[width=\linewidth]{results/superglue/BoolQ.pdf}
+	\caption{\textbf{F1 score (a) and GPU memory usage (b) on BoolQ task} for different parameter-efficient fine-tuning techniques.}
+	\label{fig:boolq_scores}
+\end{figure}
+
+\subsubsection*{RTE}
+
+For this task, we observed a new trend in performance (Figure \ref{fig:rte_scores}). In most cases, PEFT methods performed slightly worse than full fine-tuning, except for LoRa on the XLM Roberta model. This could be due to the specific architecture of XLM Roberta aligning better with LoRa's optimization process for this task. Another notable observation is that prompt tuning did not perform well on this task with the XLM Roberta model, possibly due to the complexity of the task requiring more nuanced parameter adjustments. The trend of lower GPU memory usage for PEFT methods continued, with LoHa requiring the least memory in most cases. This indicates that while PEFT methods are more efficient in terms of computational resources, they might not be as effective as full fine-tuning for the RTE task, potentially due to the task's complexity demanding more comprehensive fine-tuning.
+
+\begin{figure}[ht]\centering
+	\includegraphics[width=\linewidth]{results/superglue/RTE.pdf}
+	\caption{\textbf{F1 score (a) and GPU memory usage (b) on RTE task} for different parameter-efficient fine-tuning techniques.}
+	\label{fig:rte_scores}
+\end{figure}
+
+% Up to this point, we tried to fine tune some models on different tasks from the dataset. The results are shown in tables \ref{table:boolq_performance}, \ref{table:cb_performance} and \ref{table:copa_performance}. During the process of training and fine tuning, we ran into some problems, as the models achieved very bad performance in some cases. Despite thorough debugging and testing of our implementations, we are still not sure if there is a bug in our code or if the models really just struggle with these tasks.
 
 % Use the results section to present the final results of your work. Present the results in a objective and scientific fashion. Use visualisations to convey your results in a clear and efficient manner. When comparing results between various techniques use appropriate statistical methodology.
 
@@ -363,14 +241,21 @@ LoRa & crosloengual-bert & 0.49 & 0.49\\
 
 \section*{Discussion}
 
-TODO
+During the adaptation of the models for different tasks, we reached some interesting findings. We can conclude that PEFT methods really are efficient, as they drastically reduce the need for computational resources, when used for adapting large pretrained models.
+In addition to that, they are able to match or even outperform fully fine-tuned models in terms of F1 scores. However there can be some exceptions, as observed with the CB task, where PEFT methods failed to match the performance of traditional fine-tuning. We suspect that the complexity of the task, poses a significant challenge and since PEFT methods only adjust a small subset of the model's parameters, this limited scope may be insufficient for capturing the depth of understanding needed to perform well on such task.
+
+Another instance where the performance of the LoRA and LoHa techniques fell short compared to the fully fine-tuned model was noted in the translation task. As mentioned in the results section this could be due to slovenian being a low resource language, an issue that has been identified in other studies as well.
+
+In the future, we could include some larger pre-trained models, which could potentially yield better results. With increased numbers of parameters in those models, we would be able to illustrate the efficiency of PEFT methods even better.
+Given additional time, we would prioritize the implementation of the remaining two tasks from the Slovene SuperGLUE dataset. This way we would be able to publicly submit the test set results to Slobench and gain insight in how well our models really performed in comparison to other submissions.
+
 % Use the Discussion section to objectively evaluate your work, do not just put praise on everything you did, be critical and exposes flaws and weaknesses of your solution. You can also explain what you would do differently if you would be able to start again and what upgrades could be done on the project in the future.
 
 
 %------------------------------------------------
 
-\section*{Acknowledgments}
-TODO
+% \section*{Acknowledgments}
+% TODO
 % Here you can thank other persons (advisors, colleagues ...) that contributed to the successful completion of your project.
 
 
