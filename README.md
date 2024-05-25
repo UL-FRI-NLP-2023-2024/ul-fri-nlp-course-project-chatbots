@@ -4,14 +4,13 @@
 This repository contains the research project on Parameter-Efficient Fine-Tuning (PEFT) techniques applied to Language Models, developed for the FRI Natural Language Processing course 2024. This project evaluates different PEFT methods, comparing their efficiency and performance against traditional fine-tuning methods across several NLP tasks.
 
 ## Research Objective
-To investigate and compare the efficiency of various PEFT methods (including Adapter, Prefix-Tuning, and Low-Rank Adaptation) in fine-tuning pre-trained language models (PLMs) for task-specific data, aiming to reduce computational demands while maintaining competitive performance.
+To investigate and compare the efficiency of various PEFT methods (including Prompt-tuning and Low Rank Adaptation) in fine-tuning pre-trained language models (PLMs) for task-specific data, aiming to reduce computational demands while maintaining competitive performance.
 
 ## Dataset and Models
 - **Datasets:** Slovene SuperGLUE, Slobench (Machine Translation task)
 - **Models:** EMBEDDIA/sloberta, EMBEDDIA/crosloengual-bert, FacebookAI/xlm-roberta-base, OPUS-MT model
 
 ## PEFT Techniques Explored
-- Additive Fine-Tuning (Adapters and Soft Prompts)
 - Low-Rank Adaptation (LoRA)
 - Low-Rank Hadamard Product (LoHa)
 - Prompt-Tuning
